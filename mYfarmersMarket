@@ -1,8 +1,8 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "+1 Speed +1 Jump for Brainrots",
-   LoadingTitle = "+1 Speed +1 Jump for Brainrots",
+   Name = "[🍎] My Farmer's Market",
+   LoadingTitle = "[🍎] My Farmer's Market",
    LoadingSubtitle = "by DREW",
    ConfigurationSaving = {
       Enabled = true,
