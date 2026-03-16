@@ -1,0 +1,166 @@
+-- Wait for game to load
+repeat task.wait() until game:IsLoaded()
+
+-- Load Rayfield
+local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+
+-- Create Window
+local Window = Rayfield:CreateWindow({
+    Name = "Utility Hub",
+    LoadingTitle = "Loading UI",
+    LoadingSubtitle = "Rayfield",
+    ConfigurationSaving = {Enabled = false},
+    Discord = {Enabled = false},
+    KeySystem = false
+})
+
+-- Main Tab
+local MainTab = Window:CreateTab("Main", 4483362458)
+MainTab:CreateSection("Player Controls")
+
+-- Services
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
+
+local Player = Players.LocalPlayer
+
+-----------------
+-- FLY SYSTEM --
+-----------------
+local Flying = false
+local FlySpeed = 60
+local BV, BG, FlyLoop
+
+-- Fly speed slider
+MainTab:CreateSlider({
+    Name = "Fly Speed",
+    Range = {10, 200},
+    Increment = 5,
+    Suffix = "Speed",
+    CurrentValue = 60,
+    Flag = "FlySpeed",
+    Callback = function(Value)
+        FlySpeed = Value
+    end
+})
+
+-- Fly toggle
+MainTab:CreateToggle({
+    Name = "Fly",
+    CurrentValue = false,
+    Flag = "FlyToggle",
+    Callback = function(Value)
+        Flying = Value
+        local char = Player.Character or Player.CharacterAdded:Wait()
+        local HRP = char:WaitForChild("HumanoidRootPart")
+
+        if Value then
+            -- Create BodyVelocity and BodyGyro
+            BV = Instance.new("BodyVelocity")
+            BV.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+            BV.Velocity = Vector3.new(0,0,0)
+            BV.Parent = HRP
+
+            BG = Instance.new("BodyGyro")
+            BG.MaxTorque = Vector3.new(9e9,9e9,9e9)
+            BG.P = 1000
+            BG.CFrame = HRP.CFrame
+            BG.Parent = HRP
+
+            FlyLoop = RunService.RenderStepped:Connect(function()
+                local cam = workspace.CurrentCamera
+                local move = Vector3.zero
+
+                if UIS:IsKeyDown(Enum.KeyCode.W) then move += cam.CFrame.LookVector end
+                if UIS:IsKeyDown(Enum.KeyCode.S) then move -= cam.CFrame.LookVector end
+                if UIS:IsKeyDown(Enum.KeyCode.A) then move -= cam.CFrame.RightVector end
+                if UIS:IsKeyDown(Enum.KeyCode.D) then move += cam.CFrame.RightVector end
+                if UIS:IsKeyDown(Enum.KeyCode.Space) then move += Vector3.new(0,1,0) end
+                if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then move -= Vector3.new(0,1,0) end
+
+                if move.Magnitude > 0 then
+                    BV.Velocity = move.Unit * FlySpeed
+                else
+                    BV.Velocity = Vector3.new(0,0,0) -- hover
+                end
+
+                BG.CFrame = cam.CFrame
+            end)
+        else
+            if FlyLoop then FlyLoop:Disconnect() end
+            if BV then BV:Destroy() end
+            if BG then BG:Destroy() end
+        end
+    end
+})
+
+-----------------
+-- NOCLIP SYSTEM --
+-----------------
+local Noclip = false
+MainTab:CreateToggle({
+    Name = "Noclip",
+    CurrentValue = false,
+    Flag = "Noclip",
+    Callback = function(Value)
+        Noclip = Value
+    end
+})
+
+RunService.Stepped:Connect(function()
+    if Noclip and Player.Character then
+        for _,v in pairs(Player.Character:GetDescendants()) do
+            if v:IsA("BasePart") then
+                v.CanCollide = false
+            end
+        end
+    end
+end)
+
+-- TELEPORT TAB
+local TeleportTab = Window:CreateTab("Teleport", 4483362458)
+TeleportTab:CreateSection("Saved Positions")
+
+local Player = game.Players.LocalPlayer
+local SavedPositions = {}
+local PositionName = ""
+
+-- Input name
+TeleportTab:CreateInput({
+    Name = "Position Name",
+    PlaceholderText = "Enter name",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(text)
+        PositionName = text
+    end
+})
+
+-- Save position button
+TeleportTab:CreateButton({
+    Name = "Save Current Position",
+    Callback = function()
+
+        if PositionName == "" then return end
+
+        local char = Player.Character or Player.CharacterAdded:Wait()
+        local hrp = char:WaitForChild("HumanoidRootPart")
+
+        local savedName = PositionName
+        local savedCFrame = hrp.CFrame
+
+        SavedPositions[savedName] = savedCFrame
+
+        -- Create teleport button with stored position
+        TeleportTab:CreateButton({
+            Name = "Teleport: "..savedName,
+            Callback = function()
+                local char = Player.Character or Player.CharacterAdded:Wait()
+                local hrp = char:WaitForChild("HumanoidRootPart")
+
+                hrp.CFrame = savedCFrame
+            end
+        })
+
+    end
+})
