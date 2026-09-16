@@ -57,7 +57,7 @@ KeyTab:CreateButton({
          })
 
          -- Load your script
-         loadstring(game:HttpGet("https://raw.githubusercontent.com/babyalien0u/ride-a-pet/refs/heads/main/esp%20egg"))()
+         loadstring(game:HttpGet("https://raw.githubusercontent.com/babyalien0u/Drewhub/refs/heads/main/RIdeAPet"))()
 
       else
 
