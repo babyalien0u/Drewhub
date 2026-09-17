@@ -15,7 +15,7 @@ local Window = Rayfield:CreateWindow({
 -- Key Tab
 local KeyTab = Window:CreateTab("Key System", 4483362458)
 
-local correctKey = "drewnagwapo"
+local correctKey = "<p style="text-align:left;"><u>drewnagwapo</u></p>"
 local enteredKey = ""
 
 -- Input Key
